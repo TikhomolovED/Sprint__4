@@ -25,24 +25,21 @@ class TestBooksCollector:
         collector = BooksCollector()
         collector.add_new_book('Незнайка на лунеНезнайка на лунеНезнайка ')
 
-        assert collector.books_genre == {}
-    @pytest.mark.parametrize(
-        'name, genre',
-        [
-            ['Незнайка на луне','Мультфильмы'],
-            ['Кошмар на улице вязов', 'Ужасы']
-        ]
-    )
-    def test_set_book_genre_correct_genre(self, name, genre):
-        collector = BooksCollector()
-        collector.add_new_book(name)
-        collector.set_book_genre(name, genre)
+        assert collector.get_books_genre() == {}
 
-        assert collector.get_book_genre(name) == genre
+
+    def test_set_book_genre_correct_genre(self):
+        collector = BooksCollector()
+        collector.add_new_book('Незнайка на луне')
+        collector.set_book_genre('Незнайка на луне', 'Мультфильмы')
+
+        assert collector.get_book_genre('Незнайка на луне') == 'Мультфильмы'
 
     def test_get_books_with_specific_genre(self):
         collector = BooksCollector()
         collector.add_new_book('Незнайка на луне')
+        collector.add_new_book('Кошмар на улице вязов')
+        collector.set_book_genre('Кошмар на улице вязов', 'Ужасы')
         collector.set_book_genre('Незнайка на луне', 'Мультфильмы')
 
         assert collector.get_books_with_specific_genre('Мультфильмы') == ['Незнайка на луне']
@@ -68,14 +65,14 @@ class TestBooksCollector:
         collector.add_new_book('Незнайка на луне')
         collector.add_book_in_favorites('Незнайка на луне')
 
-        assert collector.favorites == ['Незнайка на луне']
+        assert collector.get_list_of_favorites_books() == ['Незнайка на луне']
 
     def test_delete_book_from_favorites(self):
         collector = BooksCollector()
         collector.add_new_book('Незнайка на луне')
         collector.delete_book_from_favorites('Незнайка на луне')
 
-        assert collector.favorites == []
+        assert collector.get_list_of_favorites_books() == []
 
     def test_get_list_of_favorites_books(self):
         collector = BooksCollector()
@@ -84,3 +81,26 @@ class TestBooksCollector:
 
         assert collector.get_list_of_favorites_books() == ['Незнайка на луне']
 
+    @pytest.mark.parametrize(
+        'name',
+        ['',
+         'НезнайканалунеНезнайканалунеНезнайканалун',
+         'НезнайканалунеНезнайканалунеНезнайканалуне']
+    )
+    def test_add_new_book_more_than_uncorrect_gz(self, name):
+        collector = BooksCollector()
+        collector.add_new_book(name)
+        assert collector.get_books_genre() == {}
+
+    @pytest.mark.parametrize(
+        'name',
+        ['Н',
+         'Не',
+         'НезнайканалунеНезнайканалунеНезнайканал',
+         'НезнайканалунеНезнайканалунеНезнайканалy'
+         ]
+    )
+    def test_add_new_book_more_than_correct_gz(self, name):
+        collector = BooksCollector()
+        collector.add_new_book(name)
+        assert collector.get_books_genre() == {name:''}
